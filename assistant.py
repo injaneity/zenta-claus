@@ -36,18 +36,28 @@ returns assistant object
 
 def create_assistant(instructions, file_ids):
     
-    with open("instructions.txt", "r") as file:
-        instructions = file.read().strip()
+    assistant_id = os.getenv("ASSISTANT_ID")
 
-    assistant = client.beta.assistants.create(
-        instructions=instructions,
-        model="gpt-4-turbo-preview",
-        tools=[{"type": "retrieval"}],
-        file_ids=file_ids  # Associate all uploaded file IDs here
-    )
+    if assistant_id:
+        print(f"Using existing assistant ID: {assistant_id}")
+        return client.beta.assistants.retrieve(assistant_id=assistant_id)
     
-    print("Assistant created with the following files:", file_ids)
-    return assistant
+    else:
+        with open("instructions.txt", "r") as file:
+            instructions = file.read().strip()
+
+        assistant = client.beta.assistants.create(
+            instructions=instructions,
+            model="gpt-4-turbo-preview",
+            tools=[{"type": "retrieval"}],
+            file_ids=file_ids
+        )
+
+        with open('.env', 'a') as env_file:
+            env_file.write(f"\nASSISTANT_ID={assistant['id']}")
+
+        print("Assistant created with the following files:", file_ids)
+        return assistant
 
 '''
 DELETE KNOWLEDGE FUNCTION
