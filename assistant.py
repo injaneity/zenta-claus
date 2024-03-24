@@ -19,12 +19,13 @@ def add_knowledge():
         
         if os.path.isfile(file_path):
             
-            response = client.files.create(
-                file=open(file_path, "rb"),
-                purpose='assistants'
-            )
+            file = client.files.create(
+                    file=open(file_path, "rb"),
+                    purpose='assistants'
+                    )
             
-            file_ids.append(response["id"])
+            print(f"added file {file.filename}")
+            file_ids.append(file.id)
             
     return file_ids
 
@@ -35,6 +36,8 @@ returns assistant object
 '''
 
 def create_assistant(instructions, file_ids):
+    
+    print(file_ids)
     
     assistant_id = os.getenv("ASSISTANT_ID")
 
@@ -54,7 +57,7 @@ def create_assistant(instructions, file_ids):
         )
 
         with open('.env', 'a') as env_file:
-            env_file.write(f"\nASSISTANT_ID={assistant['id']}")
+            env_file.write(f"\nASSISTANT_ID={assistant.id}")
 
         print("Assistant created with the following files:", file_ids)
         return assistant
@@ -67,11 +70,11 @@ deletes ALL files attached
 def remove_knowledge():
     
     response = client.files.list()
-    files = response['data']
+    files = response.data
     
     for file in files:
-        deletion_status = client.files.delete(file_id=file['id'])
-        print(f"Deleted file {file['id']}: {deletion_status}")
+        deletion_status = client.files.delete(file_id=file.id)
+        print(f"Deleted file {file.filename}: {deletion_status}")
         
 '''
 UPDATE KNOWLEDGE FUNCTION
@@ -80,8 +83,10 @@ removes all then adds new
 
 def update_knowledge():
     remove_knowledge()
-    add_knowledge()
+    return add_knowledge()
 
+files = update_knowledge()
+create_assistant("instructions.txt", files)
 
 # thread = client.beta.threads.create(
 #   messages=[
