@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Terminal Interface with Spaced Outputs</title>
+<style>
+  body, html {
+    margin: 0;
+    padding: 0;
+    background-color: #000;
+    color: white;
+    font-family: 'Courier New', Courier, monospace;
+    height: 100%;
+  }
+  .terminal-box {
+    position: absolute;
+    top: 25px;
+    right: 25px;
+    bottom: 25px;
+    left: 25px;
+    border: 2px solid white;
+    padding: 20px;
+    background-color: black;
+    overflow-y: auto;
+  }
+  .input-area, .output {
+    font-size: 20px; /* Increased font size for visibility */
+  }
+  .input-area {
+    width: 100%; /* Full width inside the terminal box */
+    padding: 0; /* Align text with the output */
+    margin-top: 0px;
+    background-color: black;
+    border: none;
+    color: white;
+    font-family: 'Courier New', Courier, monospace;
+    box-sizing: border-box;
+  }
+  .input-area:focus {
+    outline: none;
+  }
+  .output {
+    white-space: pre-wrap;
+    margin: 0; /* Align output text with the input area */
+    padding: 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="terminal-box" id="terminal">
+  <div class="output" id="output"></div>
+  <input type="text" class="input-area" placeholder="Enter command..." autofocus id="inputArea" />
+</div>
+
+<script>
+  document.querySelector('#inputArea').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const command = this.value.trim();
+      const output = document.querySelector('#output');
+      if (command !== '') {
+        // Simulate command line output with a gap after each response
+        output.innerHTML += '> ' + command + '\nHello, World!\n<br>'; // Added <br> for the gap
+        this.value = ''; // Clear the input
+      }
+      // Scroll to show the latest interaction
+      const terminalBox = document.getElementById('terminal');
+      terminalBox.scrollTop = terminalBox.scrollHeight;
+    }
+  });
+</script>
+
+</body>
+</html>

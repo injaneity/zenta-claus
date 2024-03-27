@@ -149,3 +149,4 @@ def log_interaction(thread_id, user_query, gpt_response):
 with open("prompt.txt", "r") as file:
             prompt = file.read().strip()
 simulate_user_interaction_and_log(prompt)
+
