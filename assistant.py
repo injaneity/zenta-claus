@@ -139,3 +139,5 @@ def log_interaction(thread_id, user_query, gpt_response):
     with open("interaction_logs.txt", "a") as log_file:
         log_entry = f"Timestamp: {timestamp}\nThread ID: {thread_id}\nUser Query: {user_query}\nGPT Response: {gpt_response}\n\n"
         log_file.write(log_entry)
+
+setup()
