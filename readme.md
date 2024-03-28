@@ -35,3 +35,11 @@ On Windows:
 ```
 pip install -r requirements.txt
 ```
+
+### 6. Rnu flask (app.py)
+```
+flask run --port 8000
+```
+
+### 7. Open html
+Type into the text and wait (for quite a bit) for a response

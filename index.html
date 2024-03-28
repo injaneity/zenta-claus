@@ -61,13 +61,27 @@
       const command = this.value.trim();
       const output = document.querySelector('#output');
       if (command !== '') {
-        // Simulate command line output with a gap after each response
-        output.innerHTML += '> ' + command + '\nHello, World!\n<br>'; // Added <br> for the gap
-        this.value = ''; // Clear the input
+        fetch('http://127.0.0.1:8000/query', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'text/plain', // Set content type to text/plain
+          },
+          body: command // Send the command as plain text
+        })
+        .then(response => response.text()) // Expecting a plain text response
+        .then(text => {
+          output.innerHTML += `> ${command}\n${text}\n<br>`; // Display the plain text response
+          this.value = ''; // Clear the input field
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          output.innerHTML += `> ${command}\nError sending command.\n<br>`;
+        });
+
+        // Scroll to show the latest interaction
+        const terminalBox = document.getElementById('terminal');
+        terminalBox.scrollTop = terminalBox.scrollHeight;
       }
-      // Scroll to show the latest interaction
-      const terminalBox = document.getElementById('terminal');
-      terminalBox.scrollTop = terminalBox.scrollHeight;
     }
   });
 </script>
