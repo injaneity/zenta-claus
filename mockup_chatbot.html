@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Consulting Company</title>
+<style>
+  body, html {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+  }
+  .header {
+    background-color: #712083;
+    color: white;
+    padding: 20px;
+    text-align: center;
+  }
+  .hero {
+    background-color: #f1f1f1;
+    padding: 50px 20px;
+    text-align: center;
+  }
+  .about, .services {
+    padding: 20px;
+    text-align: center;
+  }
+  .chatbot-container {
+    position: fixed;
+    top: 0;
+    right: 20px;
+    bottom: 0;
+    width: 300px;
+    background-color: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px 8px 0 0;
+    display: none;
+    flex-direction: column;
+  }
+  #chatbot-header { 
+    background-color: #712083; 
+    color: white; 
+    padding: 10px; 
+    border-top-left-radius: 8px; 
+    border-top-right-radius: 8px;
+    display: flex;
+    align-items: center;
+  }
+  #chatbot-header img {
+    height: 20px;
+    margin-right: 10px;
+  }
+  #chatbot-content {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+  .chatbot-message {
+    max-width: 80%;
+    margin: 5px;
+    padding: 5px;
+    border-radius: 5px;
+    display: inline-block;
+  }
+  .user-message {
+    background-color: #712083;
+    color: white;
+    margin-left: auto;
+    text-align: left;
+  }
+  .bot-message {
+    background-color: #f1f1f1;
+    color: black;
+    margin-right: auto;
+    text-align: left;
+  }
+  #chatbot-input {
+    border: none;
+    padding: 10px;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+    font-family: Arial, sans-serif; /* Ensure font consistency */
+    font-size: 16px; /* You can adjust this as needed to match the chat messages */
+    resize: none; /* Prevent manual resizing */
+  }
+  #chatbot-toggle { 
+    position: fixed; 
+    bottom: 80px; 
+    right: 20px; 
+    background-color: #712083; 
+    color: white; 
+    border: none; 
+    border-radius: 50%; 
+    width: 60px; 
+    height: 60px; 
+    cursor: pointer; 
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Welcome to Our Consulting Firm</h1>
+</div>
+
+<div class="hero">
+  <h2>Empowering Your Business</h2>
+  <p>Let's achieve great results together.</p>
+  <button>Contact Us</button>
+</div>
+
+<div class="about">
+  <h2>About Us</h2>
+  <p>We are a team of experienced consultants dedicated to helping your business grow.</p>
+</div>
+
+<div class="services">
+  <h2>Our Services</h2>
+  <p>Strategy, Marketing, Operations, and more.</p>
+</div>
+
+<div id="chatbot" class="chatbot-container">
+  <div id="chatbot-header">
+    <img src="kaisa_logo.png" alt="Kaisa Logo">
+    Chat with Kaisa!
+  </div>
+  <div id="chatbot-content" class="chat-content"></div>
+  <textarea id="chatbot-input" placeholder="質問を入力してください..."></textarea>
+</div>
+
+<button id="chatbot-toggle">💬</button>
+
+<script>
+document.getElementById("chatbot-toggle").onclick = function() {
+  var chatbot = document.getElementById("chatbot");
+  chatbot.style.display = chatbot.style.display === "none" ? "flex" : "none";
+};
+
+document.getElementById("chatbot-input").addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    const userInput = this.value.trim();
+    if (userInput) {
+      displayMessage(userInput, 'user');
+      this.value = ''; // Clear input field
+      this.style.height = 'auto'; // Reset textarea height
+      fetch('http://127.0.0.1:8000/query', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain',
+        },
+        body: userInput
+      })
+      .then(response => response.text())
+      .then(text => displayMessage(text, 'bot'))
+      .catch(error => console.error('Error:', error));
+    }
+  }
+});
+
+document.getElementById("chatbot-input").addEventListener('input', function() {
+  this.style.height = 'auto';
+  this.style.height = this.scrollHeight + 'px';
+});
+
+function displayMessage(message, sender) {
+    const div = document.createElement('div');
+    div.classList.add('chatbot-message');
+
+    if (sender === 'user') {
+        div.classList.add('user-message');
+    } else {
+        div.classList.add('bot-message');
+    }
+
+    // Split the message by new lines
+    const lines = message.split('\n');
+    lines.forEach((line, index) => {
+        // Process each line for bold text
+        const parts = line.split(/(\*\*[^*]+\*\*)/g); // Split by **bold** patterns
+        parts.forEach(part => {
+            if (part.startsWith('**') && part.endsWith('**')) {
+                // It's bold text, remove ** and wrap with <strong>
+                const boldText = part.slice(2, -2);
+                const strong = document.createElement('strong');
+                strong.textContent = boldText;
+                div.appendChild(strong);
+            } else {
+                // It's normal text
+                div.appendChild(document.createTextNode(part));
+            }
+        });
+
+        // Add a line break if it's not the last line
+        if (index < lines.length - 1) {
+            div.appendChild(document.createElement('br'));
+        }
+    });
+
+    document.getElementById('chatbot-content').appendChild(div);
+    // Scroll to the newest message
+    document.getElementById('chatbot-content').scrollTop = document.getElementById('chatbot-content').scrollHeight;
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chatbot Popup</title>
+<style>
+  body { font-family: Arial, sans-serif; }
+  #chatbot { 
+    position: fixed; 
+    bottom: 20px; 
+    right: 20px; 
+    width: 300px; 
+    height: 400px; 
+    background-color: white; 
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); 
+    border-radius: 8px; 
+    display: none; 
+    flex-direction: column; 
+  }
+  #chatbot-header { 
+    background-color: #007bff; 
+    color: white; 
+    padding: 10px; 
+    border-top-left-radius: 8px; 
+    border-top-right-radius: 8px; 
+  }
+  #chatbot-content {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+  #chatbot-input {
+    border: none;
+    padding: 10px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  #chatbot-toggle { 
+    position: fixed; 
+    bottom: 20px; 
+    right: 20px; 
+    background-color: #007bff; 
+    color: white; 
+    border: none; 
+    border-radius: 50%; 
+    width: 60px; 
+    height: 60px; 
+    cursor: pointer; 
+  }
+  .chatbot-message {
+    max-width: 80%;
+    margin: 5px;
+    padding: 5px;
+    border-radius: 5px;
+    display: inline-block;
+  }
+  .user-message {
+    background-color: #007bff;
+    color: white;
+    margin-left: auto;
+    text-align: right;
+  }
+  .bot-message {
+    background-color: #f1f1f1;
+    color: black;
+    margin-right: auto;
+    text-align: left;
+  }
+</style>
+</head>
+<body>
+
+<div id="chatbot">
+  <div id="chatbot-header">Chat with us!</div>
+  <div id="chatbot-content" class="chat-content"></div>
+  <input type="text" id="chatbot-input" placeholder="Type a message..." />
+</div>
+
+<button id="chatbot-toggle">Chat</button>
+
+<script>
+  document.getElementById("chatbot-toggle").onclick = function() {
+    var chatbot = document.getElementById("chatbot");
+    if (chatbot.style.display === "none") {
+      chatbot.style.display = "flex";
+    } else {
+      chatbot.style.display = "none";
+    }
+  };
+
+  document.getElementById("chatbot-input").addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && this.value.trim() !== '') {
+      e.preventDefault();
+      const userInput = this.value.trim();
+      displayMessage(userInput, 'user');
+      this.value = ''; // Clear input field
+      
+      fetch('http://127.0.0.1:8000/query', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain',
+        },
+        body: userInput
+      })
+      .then(response => response.text())
+      .then(text => {
+        displayMessage(text, 'bot');
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        displayMessage('Error sending message.', 'bot');
+      });
+    }
+  });
+
+  function displayMessage(message, sender) {
+    const div = document.createElement('div');
+    div.textContent = message;
+    div.classList.add('chatbot-message');
+    if (sender === 'user') {
+      div.classList.add('user-message');
+    } else {
+      div.classList.add('bot-message');
+    }
+    document.getElementById('chatbot-content').appendChild(div);
+    // Scroll to the bottom
+    document.getElementById('chatbot-content').scrollTop = document.getElementById('chatbot-content').scrollHeight;
+  }
+</script>
+
+</body>
+</html>
